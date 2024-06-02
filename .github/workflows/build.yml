@@ -1,0 +1,20 @@
+name: Create Documentation
+on: push
+jobs:
+  test_apt_cache:
+    runs-on: ubuntu-20.04
+    name: Test APT cache
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set environment
+        run: echo "APT_DEPENDENCIES=$(xargs < .github/workflows/deps-linux.txt)" >> "$GITHUB_ENV"
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: ${{ env.APT_DEPENDENCIES }}
+          version: 1.0
+
+      - name: Build
+        run: g++ ./hello-world.cpp -o ./hello-world
+
+      - name: Run
+        run: ./hello-world

@@ -1,0 +1,3 @@
+libgig-dev
+libsdl2-dev
+libsuil-dev
