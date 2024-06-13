@@ -3,3 +3,7 @@ ccache
 cmake
 git
 wget
+curl
+zip
+unzip
+tar
