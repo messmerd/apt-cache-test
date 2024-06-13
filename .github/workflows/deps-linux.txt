@@ -1,6 +1,7 @@
 libasound2-dev
 ccache
 cmake
+make
 git
 wget
 curl

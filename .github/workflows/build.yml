@@ -30,10 +30,8 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-fast
       - name: Set environment
         run: echo "APT_DEPENDENCIES=$(xargs < .github/workflows/deps-linux.txt)" >> "$GITHUB_ENV"
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: ${{ env.APT_DEPENDENCIES }}
-          version: 1.0
+      - name: Install APT dependencies
+        run: sudo apt-get install -y ${{ env.APT_DEPENDENCIES }}
       - name: Download and bootstrap vcpkg
         run: |
           git clone --branch 2024.05.24 https://github.com/microsoft/vcpkg.git
@@ -47,12 +45,9 @@ jobs:
                 -DCMAKE_TOOLCHAIN_FILE="${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" \
                 -DVCPKG_TARGET_TRIPLET="x64-linux" \
                 -DVCPKG_HOST_TRIPLET="x64-linux" \
-                -DVCPKG_MANIFEST_INSTALL="${{ env.should_install_manifest }}" \
+                -DVCPKG_MANIFEST_INSTALL="YES" \
                 -DCMAKE_INSTALL_PREFIX=./build/install \
                 $CMAKE_OPTS
-        env:
-          should_install_manifest:
-            ${{ steps.cache-deps.outputs.cache-hit == 'true' && 'NO' || 'YES' }}
       - name: Build
         run: cmake --build build
       - name: Run
