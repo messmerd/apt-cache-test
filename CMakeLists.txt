@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(lmms CXX)
+project(lmms)
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 
 # check for ALSA
 FIND_PACKAGE(Alsa)

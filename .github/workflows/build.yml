@@ -51,4 +51,4 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Run
-        run: ./lmms
+        run: ./build/lmms
