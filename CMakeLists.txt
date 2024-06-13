@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
+project(lmms CXX)
+
 # check for ALSA
 FIND_PACKAGE(Alsa)
 IF(ALSA_FOUND)

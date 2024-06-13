@@ -1,4 +1,4 @@
-name: Create Documentation
+name: Test
 on: push
 jobs:
   linux:
@@ -44,7 +44,7 @@ jobs:
           mkdir build
           cmake -S . \
                 -B build \
-                --toolchain "${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" \
+                -DCMAKE_TOOLCHAIN_FILE="${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" \
                 -DVCPKG_TARGET_TRIPLET="x64-linux" \
                 -DVCPKG_HOST_TRIPLET="x64-linux" \
                 -DVCPKG_MANIFEST_INSTALL="${{ env.should_install_manifest }}" \
@@ -56,4 +56,4 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Run
-        run: ./hello-world
+        run: ./lmms
