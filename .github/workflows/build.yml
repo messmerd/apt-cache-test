@@ -1,20 +1,59 @@
 name: Create Documentation
 on: push
 jobs:
-  test_apt_cache:
+  linux:
+    name: Linux build
     runs-on: ubuntu-20.04
-    name: Test APT cache
+    container: ubuntu:20.04
+    env:
+      CMAKE_OPTS: >-
+        -DUSE_WERROR=ON
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        -DUSE_COMPILE_CACHE=ON
+      CCACHE_MAXSIZE: 0
+      CCACHE_NOCOMPRESS: 1
+      MAKEFLAGS: -j2
+      DEBIAN_FRONTEND: noninteractive
     steps:
+      - name: Setup
+        run: |
+          apt-get update && apt-get install -y sudo
+          sudo apt-get install -y git
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: actions/checkout@v2
+      - name: Install apt-fast
+        run: |
+          sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends software-properties-common
+          sudo add-apt-repository -y ppa:apt-fast/stable
+          sudo apt update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-fast
       - name: Set environment
         run: echo "APT_DEPENDENCIES=$(xargs < .github/workflows/deps-linux.txt)" >> "$GITHUB_ENV"
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           packages: ${{ env.APT_DEPENDENCIES }}
           version: 1.0
-
+      - name: Download and bootstrap vcpkg
+        run: |
+          git clone --branch 2024.05.24 https://github.com/microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
+          echo "VCPKG_INSTALLATION_ROOT=${GITHUB_WORKSPACE}/vcpkg" >> "$GITHUB_ENV"
+      - name: Configure
+        run: |
+          mkdir build
+          cmake -S . \
+                -B build \
+                --toolchain "${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" \
+                -DVCPKG_TARGET_TRIPLET="x64-linux" \
+                -DVCPKG_HOST_TRIPLET="x64-linux" \
+                -DVCPKG_MANIFEST_INSTALL="${{ env.should_install_manifest }}" \
+                -DCMAKE_INSTALL_PREFIX=./build/install \
+                $CMAKE_OPTS
+        env:
+          should_install_manifest:
+            ${{ steps.cache-deps.outputs.cache-hit == 'true' && 'NO' || 'YES' }}
       - name: Build
-        run: g++ ./hello-world.cpp -o ./hello-world
-
+        run: cmake --build build
       - name: Run
         run: ./hello-world
