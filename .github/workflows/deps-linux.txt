@@ -10,3 +10,4 @@ unzip
 tar
 g++
 gcc
+software-properties-common
