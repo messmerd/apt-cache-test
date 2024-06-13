@@ -47,3 +47,8 @@ jobs:
         run: cmake --build build
       - name: Run
         run: ./build/lmms
+      - name: Keep container running on failure
+        if: ${{ failure() && env.ACT }}
+        run: |
+          echo "Build failed. Dropping into an interactive shell."
+          tail -f /dev/null
